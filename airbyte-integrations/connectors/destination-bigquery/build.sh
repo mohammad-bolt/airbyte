@@ -2,6 +2,6 @@
 cd ../../..
 ./gradlew :airbyte-integrations:connectors:destination-bigquery:build
 cd -
-IMG=mohammadbolt/airbyte-bigquery:20211006
+IMG=mohammadbolt/airbyte-bigquery:1.0.20211006-v2
 docker build . -t $IMG
 docker push $IMG

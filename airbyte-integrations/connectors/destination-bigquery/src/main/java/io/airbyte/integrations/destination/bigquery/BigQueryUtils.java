@@ -7,6 +7,7 @@ package io.airbyte.integrations.destination.bigquery;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.cloud.bigquery.BigQuery;
 import com.google.cloud.bigquery.BigQueryException;
+import com.google.cloud.bigquery.Clustering;
 import com.google.cloud.bigquery.Dataset;
 import com.google.cloud.bigquery.DatasetInfo;
 import com.google.cloud.bigquery.Job;
@@ -18,10 +19,13 @@ import com.google.cloud.bigquery.StandardTableDefinition;
 import com.google.cloud.bigquery.TableDefinition;
 import com.google.cloud.bigquery.TableId;
 import com.google.cloud.bigquery.TableInfo;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import io.airbyte.commons.json.Jsons;
 import java.util.Set;
 import java.util.UUID;
+
+import io.airbyte.integrations.base.JavaBaseConstants;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -85,8 +89,12 @@ public class BigQueryUtils {
     try {
 
       final TableId tableId = TableId.of(datasetName, tableName);
-      final TableDefinition tableDefinition = StandardTableDefinition.of(schema);
-      final TableInfo tableInfo = TableInfo.newBuilder(tableId, tableDefinition).build();
+      final TableDefinition tableDefinition = StandardTableDefinition.of(schema)
+                      .toBuilder().setClustering(Clustering.newBuilder().setFields(
+                              ImmutableList.of(JavaBaseConstants.COLUMN_NAME_EMITTED_AT)).build())
+                      .build();
+      final TableInfo tableInfo = TableInfo.newBuilder(tableId, tableDefinition)
+              .build();
 
       bigquery.create(tableInfo);
       LOGGER.info("Table: {} created successfully", tableId);
